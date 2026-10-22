@@ -1,0 +1,10 @@
+pandas>=2.0
+numpy
+openpyxl
+flask>=3.0
+waitress
+selenium>=4.10
+pytz
+pillow
+# Opcional: clasificacion por imagen con Gemini. Exige DONARTICULO_ONLINE_LOOKUPS=1 y GEMINI_API_KEY (ver README, "Privacidad")
+# google-genai

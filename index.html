@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DON ARTÍCULO - Consulta de Referencias</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #071B33;
+            color: #EAF6FF;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Header */
+        .header {
+            width: 100%;
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            background: linear-gradient(180deg, #0B2A4A 0%, #071B33 100%);
+            border-bottom: 1px solid #1D4E8940;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2B8CFF, #60B8FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .header .badge {
+            background: #2B8CFF20;
+            color: #60B8FF;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            border: 1px solid #2B8CFF40;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main container */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            padding: 32px 24px;
+            flex: 1;
+        }
+
+        /* Search card */
+        .search-card {
+            background: #0B2A4A;
+            border: 1px solid #1D4E89;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-card label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #A9C9FF;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-group input {
+            flex: 1;
+            background: #071B33;
+            border: 2px solid #1D4E89;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 18px;
+            font-family: 'Inter', sans-serif;
+            color: #EAF6FF;
+            font-weight: 600;
+            letter-spacing: 1px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #2B8CFF;
+            box-shadow: 0 0 0 3px #2B8CFF30;
+        }
+
+        .input-group input::placeholder {
+            color: #4A6B8F;
+            font-weight: 400;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2B8CFF, #1870DD);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px #2B8CFF40;
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Status */
+        .status {
+            text-align: center;
+            padding: 16px;
+            display: none;
+        }
+
+        .status.loading {
+            display: block;
+            color: #60B8FF;
+        }
+
+        .status.error {
+            display: block;
+            color: #FF6B6B;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #2B8CFF30;
+            border-top-color: #2B8CFF;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .robot-img {
+            display: block;
+            margin: 20px auto;
+            max-width: 250px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+        }
+
+        .live-logs {
+            background: #071B33;
+            border: 1px solid #1D4E89;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            color: #A9C9FF;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 16px;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        /* Results */
+        .results {
+            display: none;
+        }
+
+        .results.visible {
+            display: block;
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #0B2A4A, #102F55);
+            border: 1px solid #1D4E89;
+            border-radius: 16px;
+            padding: 24px 28px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .result-header .ref-info h2 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #EAF6FF;
+            margin-bottom: 4px;
+        }
+
+        .result-header .ref-info .desc {
+            font-size: 14px;
+            color: #A9C9FF;
+        }
+
+        .category-badge {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cat-CERAMICA {
+            background: #FF8C4220;
+            color: #FF8C42;
+            border: 1px solid #FF8C4240;
+        }
+
+        .cat-GRIFERIA {
+            background: #4ECDC420;
+            color: #4ECDC4;
+            border: 1px solid #4ECDC440;
+        }
+
+        .cat-SANITARIO {
+            background: #A78BFA20;
+            color: #A78BFA;
+            border: 1px solid #A78BFA40;
+        }
+
+        .cat-ACCESORIOS {
+            background: #F472B620;
+            color: #F472B6;
+            border: 1px solid #F472B640;
+        }
+
+        .cat-MUEBLES {
+            background: #FBBF2420;
+            color: #FBBF24;
+            border: 1px solid #FBBF2440;
+        }
+
+        .cat-MAMPARAS {
+            background: #34D39920;
+            color: #34D399;
+            border: 1px solid #34D39940;
+        }
+
+        .cat-CEMENTO {
+            background: #9CA3AF20;
+            color: #9CA3AF;
+            border: 1px solid #9CA3AF40;
+        }
+
+        .cat-COMPLEMENTOS {
+            background: #60A5FA20;
+            color: #60A5FA;
+            border: 1px solid #60A5FA40;
+        }
+
+        .cat-REPUESTOS {
+            background: #FB923C20;
+            color: #FB923C;
+            border: 1px solid #FB923C40;
+        }
+
+        .cat-VARIOS {
+            background: #6B728020;
+            color: #6B7280;
+            border: 1px solid #6B728040;
+        }
+
+        /* Data grid */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .data-cell {
+            background: #0B2A4A;
+            border: 1px solid #1D4E8960;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .data-cell .label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6B8DB5;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .data-cell .value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #EAF6FF;
+        }
+
+        .data-cell .value.price {
+            color: #34D399;
+        }
+
+        /* Logs */
+        .logs-card {
+            background: #0B2A4A;
+            border: 1px solid #1D4E8960;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .logs-card summary {
+            font-size: 13px;
+            color: #A9C9FF;
+            cursor: pointer;
+            font-weight: 500;
+            padding: 4px;
+        }
+
+        .logs-card .log-content {
+            margin-top: 12px;
+            background: #071B33;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 12px;
+            color: #A9C9FF;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        .log-line {
+            padding: 2px 0;
+        }
+
+        .log-line.success {
+            color: #34D399;
+        }
+
+        .log-line.error {
+            color: #FF6B6B;
+        }
+
+        .log-line.warn {
+            color: #FBBF24;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #4A6B8F;
+        }
+
+        /* History */
+        .history {
+            margin-top: 32px;
+        }
+
+        .history h3 {
+            font-size: 14px;
+            color: #6B8DB5;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .history-item {
+            background: #0B2A4A;
+            border: 1px solid #1D4E8940;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: #2B8CFF;
+        }
+
+        .history-item .hi-ref {
+            font-weight: 600;
+        }
+
+        .history-item .hi-prov {
+            color: #A9C9FF;
+            font-size: 13px;
+        }
+
+        .history-item .hi-time {
+            color: #4A6B8F;
+            font-size: 12px;
+        }
+
+        /* Popups rojos: aviso de precio 0 / sin precio */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-red {
+            background: #2A0A0A;
+            border: 2px solid #FF3B3B;
+            border-radius: 16px;
+            padding: 30px 34px;
+            max-width: 540px;
+            width: 90%;
+            box-shadow: 0 10px 50px rgba(255, 59, 59, 0.35);
+            text-align: center;
+            animation: pop 0.18s ease-out;
+        }
+
+        @keyframes pop {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-red .modal-title {
+            color: #FF6B6B;
+            font-size: 21px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            line-height: 1.3;
+        }
+
+        .modal-red .modal-msg {
+            color: #FFD9D9;
+            font-size: 15px;
+            line-height: 1.55;
+            margin-bottom: 24px;
+        }
+
+        .modal-red .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-danger {
+            background: #FF3B3B;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 13px 30px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.1s;
+        }
+
+        .btn-danger:hover {
+            background: #E62E2E;
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: #FFB3B3;
+            border: 1px solid #FF3B3B;
+            border-radius: 10px;
+            padding: 13px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .btn-ghost:hover {
+            background: #FF3B3B20;
+        }
+
+        /* Banner: elegir proveedor / fila cuando el codigo no es unico */
+        .modal-choose {
+            background: #0B2A4A;
+            border: 2px solid #2B8CFF;
+            border-radius: 16px;
+            padding: 28px 30px;
+            max-width: 680px;
+            width: 92%;
+            max-height: 88vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 50px rgba(43, 140, 255, 0.35);
+            text-align: center;
+            animation: pop 0.18s ease-out;
+        }
+
+        .modal-choose .choose-title {
+            color: #60B8FF;
+            font-size: 21px;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 8px;
+        }
+
+        .modal-choose .choose-sub {
+            color: #EAF6FF;
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .modal-choose .choose-sub b {
+            color: #FFD166;
+            font-size: 17px;
+            letter-spacing: 0.5px;
+        }
+
+        .choose-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .choose-option {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+            background: #071B33;
+            color: #EAF6FF;
+            border: 1px solid #2B8CFF60;
+            border-radius: 12px;
+            padding: 14px 18px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.15s, border-color 0.15s, transform 0.1s;
+        }
+
+        .choose-option:hover,
+        .choose-option:focus-visible {
+            background: #12395F;
+            border-color: #60B8FF;
+            transform: translateY(-1px);
+            outline: none;
+        }
+
+        .choose-option .co-prov {
+            font-size: 18px;
+            font-weight: 700;
+            color: #60B8FF;
+        }
+
+        .choose-option .co-desc {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .choose-option .co-meta {
+            font-size: 12px;
+            color: #A9C9FF;
+        }
+
+        .choose-option .co-note {
+            font-size: 13px;
+            font-weight: 700;
+            color: #FFD166;
+        }
+
+        .choose-option .co-badge {
+            align-self: flex-start;
+            background: #8593A6;
+            color: #0A1626;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        /* Ya importado: en gris y sin poder pulsarse */
+        .choose-option.done,
+        .choose-option.done:hover {
+            background: #0A1626;
+            border: 1px dashed #6B7C93;
+            color: #8593A6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .choose-option.done .co-prov,
+        .choose-option.done .co-meta {
+            color: #8593A6;
+        }
+
+        .btn-cancel-blue {
+            background: transparent;
+            color: #A9C9FF;
+            border: 1px solid #2B8CFF80;
+            border-radius: 10px;
+            padding: 12px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+        }
+
+        .btn-cancel-blue:hover {
+            background: #2B8CFF20;
+        }
+
+        /* Alerta roja: el codigo ya esta en el sistema en OTRO proveedor -> recuadro en blanco para otra referencia */
+        .modal-red .modal-msg.tight {
+            margin-bottom: 8px;
+        }
+
+        .modal-red .codigo-sub {
+            color: #FFB3B3;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .modal-red .codigo-input {
+            width: 100%;
+            background: #1A0606;
+            border: 2px solid #FF3B3B;
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-size: 18px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 1px;
+            color: #FFECEC;
+            text-align: center;
+            text-transform: uppercase;
+            outline: none;
+            margin-bottom: 8px;
+        }
+
+        .modal-red .codigo-input:focus {
+            box-shadow: 0 0 0 3px #FF3B3B40;
+        }
+
+        .modal-red .codigo-error {
+            min-height: 20px;
+            color: #FFD166;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 14px;
+        }
+
+        /* ===== Pestaña inferior REINICIAR REFERENCIA (pide contraseña) ===== */
+        .footer {
+            padding-bottom: 64px;            /* la pestaña fija no tapa el pie */
+        }
+
+        .tab-reinicio {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 900;
+            min-height: 38px;
+            padding: 10px 26px 9px;
+            background: #0B2A4A;
+            color: #FFD166;
+            border: 1px solid #1D4E89;
+            border-bottom: none;
+            border-radius: 12px 12px 0 0;
+            box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.35);
+            font-family: 'Inter', sans-serif;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+
+        .tab-reinicio::before {
+            content: '\21BB';
+            margin-right: 9px;
+            font-size: 15px;
+            vertical-align: -1px;
+        }
+
+        .tab-reinicio:hover {
+            background: #12395F;
+            border-color: #FFD166;
+            color: #FFE29A;
+        }
+
+        .tab-reinicio:focus-visible {
+            outline: 2px solid #FFD166;
+            outline-offset: 2px;
+        }
+
+        .modal-reinicio {
+            max-width: 600px;
+            min-width: 0;                    /* nunca mas ancha que la pantalla, aunque haya una palabra larguisima */
+        }
+
+        .reinicio-paso[hidden] {
+            display: none;
+        }
+
+        .modal-reinicio .choose-sub {
+            margin-bottom: 14px;
+        }
+
+        .reinicio-error {
+            min-height: 20px;
+            margin-bottom: 14px;
+            color: #FFD166;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .reinicio-input {
+            width: 100%;
+            background: #071B33;
+            border: 2px solid #1D4E89;
+            border-radius: 12px;
+            padding: 13px 16px;
+            margin-bottom: 20px;
+            font-family: 'Inter', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: #EAF6FF;
+            text-align: center;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .reinicio-input:focus {
+            border-color: #2B8CFF;
+            box-shadow: 0 0 0 3px #2B8CFF30;
+        }
+
+        .reinicio-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+            max-height: 38vh;
+            overflow-y: auto;
+        }
+
+        .reinicio-lista:focus-visible {
+            outline: 2px solid #60B8FF;
+            outline-offset: 3px;
+            border-radius: 12px;
+        }
+
+        .reinicio-fila {
+            min-width: 0;
+            text-align: left;
+            background: #071B33;
+            border: 1px solid #1D4E89;
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .rf-cab {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .rf-prov {
+            font-size: 16px;
+            font-weight: 700;
+            color: #60B8FF;
+            min-width: 0;
+            overflow-wrap: anywhere;
+        }
+
+        .rf-fecha {
+            font-size: 12px;
+            color: #A9C9FF;
+            white-space: nowrap;
+        }
+
+        .rf-cod {
+            font-size: 13px;
+            font-weight: 700;
+            color: #FFD166;
+            margin-bottom: 4px;
+            overflow-wrap: anywhere;
+        }
+
+        .rf-desc {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #EAF6FF;
+            overflow-wrap: anywhere;
+        }
+
+        .reinicio-aviso {
+            color: #A9C9FF;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .reinicio-final {
+            color: #EAF6FF;
+            font-size: 16px;
+            line-height: 1.5;
+            margin: 6px 0 24px;
+        }
+
+        .modal-reinicio .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-reinicio button:disabled {
+            opacity: 0.55;
+            cursor: wait;
+        }
+
+        @media (max-width: 520px) {
+            .modal-reinicio {
+                padding: 22px 18px;
+            }
+
+            .rf-cab {
+                flex-direction: column;
+                gap: 2px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .tab-reinicio, .reinicio-input { transition: none; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>🤖 DON ARTÍCULO</h1>
+        <span class="badge">Web Edition</span>
+    </div>
+
+    <div class="container">
+        <!-- Search -->
+        <div class="search-card">
+            <label for="ref-input">Referencia del artículo</label>
+            <div class="input-group">
+                <input type="text" id="ref-input" placeholder="Ej: REF12345" autocomplete="off" autofocus>
+                <button class="btn-primary" id="btn-search" onclick="buscar()">
+                    Introducir
+                </button>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="status" id="status">
+            <div id="status-text"></div>
+            <img id="status-img" class="robot-img" style="display:none;" />
+            <div id="live-logs" class="live-logs" style="display:none;"></div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="results">
+            <div class="result-header" id="result-header">
+                <div class="ref-info">
+                    <h2 id="res-ref"></h2>
+                    <div class="desc" id="res-desc"></div>
+                </div>
+                <span class="category-badge" id="res-category"></span>
+            </div>
+
+            <div class="data-grid">
+                <div class="data-cell">
+                    <div class="label">Proveedor</div>
+                    <div class="value" id="res-provider"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Nº Proveedor</div>
+                    <div class="value" id="res-provnum"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Unidad</div>
+                    <div class="value" id="res-unit"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Cálculo Base</div>
+                    <div class="value" id="res-calcbase"></div>
+                </div>
+            </div>
+
+            <div class="data-grid">
+                <div class="data-cell">
+                    <div class="label">Precio Compra</div>
+                    <div class="value price" id="res-pcompra"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Precio Base Tarifa</div>
+                    <div class="value price" id="res-pbase"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Tarifa 1 (PVP)</div>
+                    <div class="value price" id="res-t1"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Tarifa 2 (Pro)</div>
+                    <div class="value price" id="res-t2"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Tarifa 3 (Part)</div>
+                    <div class="value price" id="res-t3"></div>
+                </div>
+            </div>
+
+            <div class="data-grid">
+                <div class="data-cell">
+                    <div class="label">% Dto1</div>
+                    <div class="value" id="res-dto1"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">% Dto2</div>
+                    <div class="value" id="res-dto2"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">Familia</div>
+                    <div class="value" id="res-familia"></div>
+                </div>
+                <div class="data-cell">
+                    <div class="label">EAN</div>
+                    <div class="value" id="res-ean" style="font-size:14px;"></div>
+                </div>
+            </div>
+
+            <details class="logs-card">
+                <summary>📋 Ver log completo</summary>
+                <div class="log-content" id="log-content"></div>
+            </details>
+        </div>
+
+        <!-- History -->
+        <div class="history" id="history" style="display:none;">
+            <h3>🕐 Consultas recientes</h3>
+            <div id="history-list"></div>
+        </div>
+    </div>
+
+    <!-- POPUP ROJO 1: aviso de precio 0 / sin precio (BLOQUEA la importación) -->
+    <div class="modal-overlay" id="modal-aviso">
+        <div class="modal-red">
+            <div class="modal-title">⚠️ AVISO</div>
+            <div class="modal-msg">PRECIO DE «0€» O SIN ESPECIFICAR EN TARIFA, CONSULTAR CON FABRICANTE, METER MANUALMENTE</div>
+            <div class="modal-actions">
+                <button class="btn-danger" id="modal-aviso-ok">ENTENDIDO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP ROJO 2: importación cancelada -->
+    <div class="modal-overlay" id="modal-cancel">
+        <div class="modal-red">
+            <div class="modal-title">IMPORTACIÓN CANCELADA</div>
+            <div class="modal-actions">
+                <button class="btn-danger" id="modal-cancel-ok">CERRAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- POPUP ROJO 3: referencia de un proveedor que ya esta entero en el ERP: no se importa nada -->
+    <div class="modal-overlay" id="modal-erp" role="alertdialog" aria-modal="true" aria-labelledby="modal-erp-title" aria-describedby="modal-erp-msg">
+        <div class="modal-red">
+            <div class="modal-title" id="modal-erp-title">⚠️ REFERENCIA YA EN EL ERP</div>
+            <div class="modal-msg" id="modal-erp-msg"></div>
+            <div class="modal-actions">
+                <button class="btn-danger" id="modal-erp-ok">ENTENDIDO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BANNER: el codigo no es unico (varios proveedores / varias filas) -> la persona elige -->
+    <div class="modal-overlay" id="modal-choose" role="dialog" aria-modal="true" aria-labelledby="choose-title">
+        <div class="modal-choose">
+            <div class="choose-title" id="choose-title"></div>
+            <div class="choose-sub"><span id="choose-subtitle"></span> &mdash; referencia <b id="choose-ref"></b></div>
+            <div class="choose-options" id="choose-options"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel-blue" id="choose-cancel">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALERTA ROJA: el codigo ya esta en el sistema en OTRO proveedor -> recuadro en blanco para otra referencia -->
+    <div class="modal-overlay" id="modal-codigo" role="dialog" aria-modal="true" aria-labelledby="codigo-title">
+        <div class="modal-red">
+            <div class="modal-title">⚠️ AVISO</div>
+            <div class="modal-msg tight" id="codigo-title"></div>
+            <div class="codigo-sub" id="codigo-sub"></div>
+            <input type="text" class="codigo-input" id="codigo-input" maxlength="15" autocomplete="off"
+                spellcheck="false" aria-label="Nueva referencia">
+            <div class="codigo-error" id="codigo-error" role="alert"></div>
+            <div class="modal-actions">
+                <button class="btn-danger" id="codigo-ok">ACEPTAR</button>
+                <button class="btn-ghost" id="codigo-cancel">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- REINICIAR REFERENCIA: olvida lo que el programa tiene apuntado de una referencia (pide contraseña) -->
+    <div class="modal-overlay" id="modal-reinicio" role="dialog" aria-modal="true" aria-labelledby="reinicio-title">
+        <div class="modal-choose modal-reinicio">
+            <div class="choose-title" id="reinicio-title">REINICIAR REFERENCIA</div>
+            <div class="reinicio-error" id="reinicio-error" role="alert"></div>
+
+            <div class="reinicio-paso" id="reinicio-paso-clave">
+                <div class="choose-sub">Escribe la contraseña para entrar.</div>
+                <input type="password" class="reinicio-input" id="reinicio-clave" maxlength="64"
+                    autocomplete="new-password" aria-label="Contraseña">
+                <div class="modal-actions">
+                    <button class="btn-primary" id="reinicio-entrar">ENTRAR</button>
+                    <button class="btn-cancel-blue" data-cerrar>CANCELAR</button>
+                </div>
+            </div>
+
+            <div class="reinicio-paso" id="reinicio-paso-ref" hidden>
+                <div class="choose-sub">Escribe la referencia que quieres dejar como si nunca se hubiera metido.</div>
+                <input type="text" class="reinicio-input" id="reinicio-ref" maxlength="40" autocomplete="off"
+                    spellcheck="false" style="text-transform: uppercase;" aria-label="Referencia a reiniciar">
+                <div class="modal-actions">
+                    <button class="btn-primary" id="reinicio-buscar">BUSCAR</button>
+                    <button class="btn-cancel-blue" data-cerrar>CANCELAR</button>
+                </div>
+            </div>
+
+            <div class="reinicio-paso" id="reinicio-paso-filas" hidden>
+                <div class="choose-sub" id="reinicio-resumen"></div>
+                <div class="reinicio-lista" id="reinicio-lista" tabindex="0" role="region" aria-label="Importaciones apuntadas"></div>
+                <div class="reinicio-aviso" id="reinicio-aviso">Al reiniciar, el programa olvidará esto y la próxima vez meterá la referencia con su código original. El ERP no se toca.</div>
+                <div class="modal-actions">
+                    <button class="btn-danger" id="reinicio-confirmar">REINICIAR</button>
+                    <button class="btn-cancel-blue" id="reinicio-atras" aria-describedby="reinicio-resumen">ATRÁS</button>
+                </div>
+            </div>
+
+            <div class="reinicio-paso" id="reinicio-paso-fin" hidden>
+                <div class="reinicio-final" id="reinicio-final"></div>
+                <div class="modal-actions">
+                    <button class="btn-primary" id="reinicio-meter">INTRODUCIRLA AHORA</button>
+                    <button class="btn-cancel-blue" id="reinicio-otra" aria-describedby="reinicio-final">REINICIAR OTRA</button>
+                    <button class="btn-cancel-blue" data-cerrar>CERRAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="tab-reinicio" id="tab-reinicio" aria-haspopup="dialog" aria-controls="modal-reinicio">REINICIAR REFERENCIA</button>
+
+    <div class="footer">
+        DON ARTÍCULO Web &copy; 2026 — Conectado al servidor principal
+    </div>
+
+    <script>
+        const input = document.getElementById('ref-input');
+        const btn = document.getElementById('btn-search');
+        const statusEl = document.getElementById('status');
+        const resultsEl = document.getElementById('results');
+        let history = [];
+        let currentEventSource = null;
+
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') buscar();
+        });
+
+        function buscar(provider, row, newCode, conjuntoOk) {
+            provider = (typeof provider === 'string') ? provider : '';
+            row = (typeof row === 'number') ? row : null;
+            newCode = (typeof newCode === 'string') ? newCode : '';
+            conjuntoOk = (conjuntoOk === true);      // la persona acepto introducir solo la pieza individual
+            const ref = input.value.trim();
+            if (!ref) return;
+
+            if (currentEventSource) {
+                currentEventSource.close();
+            }
+
+            btn.disabled = true;
+            resultsEl.classList.remove('visible');
+            statusEl.className = 'status loading';
+
+            document.getElementById('status-text').innerHTML = '<span class="spinner"></span> Buscando referencia e Importando (Robot en marcha)...';
+
+            const imgEl = document.getElementById('status-img');
+            imgEl.onerror = function () { this.style.display = 'none'; };      // las imagenes no se publican con el codigo
+            imgEl.src = '/static/en_proceso.gif';
+            imgEl.style.display = 'block';
+
+            const logsEl = document.getElementById('live-logs');
+            logsEl.innerHTML = '';
+            logsEl.style.display = 'flex';
+
+            let storedLogs = [];
+
+            // Usamos Server-Sent Events (SSE) para stream en tiempo real
+            currentEventSource = new EventSource('/procesar_stream?ref=' + encodeURIComponent(ref)
+                + (provider ? '&provider=' + encodeURIComponent(provider) : '')
+                + (row !== null ? '&row=' + row : '')
+                + (newCode ? '&newcode=' + encodeURIComponent(newCode) : '')
+                + (conjuntoOk ? '&conjunto=ok' : ''));
+
+            currentEventSource.onmessage = function (e) {
+                const data = JSON.parse(e.data);
+
+                if (data.type === 'log') {
+                    storedLogs.push(data.msg);
+                    const div = document.createElement('div');
+                    let cls = 'log-line';
+                    if (data.msg.includes('✅') || data.msg.includes('✓')) cls += ' success';
+                    else if (data.msg.includes('❌') || data.msg.includes('Error')) cls += ' error';
+                    else if (data.msg.includes('⚠') || data.msg.includes('Forzando')) cls += ' warn';
+                    div.className = cls;
+                    div.textContent = data.msg;
+                    logsEl.appendChild(div);
+                    logsEl.scrollTop = logsEl.scrollHeight;
+                }
+                else if (data.type === 'result') {
+                    currentEventSource.close();
+                    const p = data.payload;
+
+                    // PROVEEDOR YA ENTERO EN EL ERP: no se importa nada -> aviso rojo
+                    if (p && p.ya_en_erp_blocked) {
+                        statusEl.className = 'status';
+                        document.getElementById('status-text').innerHTML = '';
+                        imgEl.style.display = 'none';
+                        logsEl.style.display = 'none';
+                        btn.disabled = false;
+                        document.getElementById('modal-erp-msg').textContent = 'La referencia ' + (p.reference || '')
+                            + ' es de ' + (p.provider || '') + ' y ya está en el ERP con sus valores. No se importa nada para no pisarlos.';
+                        document.getElementById('modal-erp').classList.add('show');
+                        document.getElementById('modal-erp-ok').focus();
+                        return;
+                    }
+
+                    // PRECIO 0 / SIN PRECIO: importación BLOQUEADA -> avisar y cancelar
+                    if (p && p.zero_price_blocked) {
+                        statusEl.className = 'status';
+                        document.getElementById('status-text').innerHTML = '';
+                        imgEl.style.display = 'none';
+                        logsEl.style.display = 'none';
+                        btn.disabled = false;
+                        document.getElementById('modal-aviso').classList.add('show');
+                        return;
+                    }
+
+                    // Un resultado sin success === true es un ERROR: nunca se pinta como "completado".
+                    if (!p || p.success !== true) {
+                        statusEl.className = 'status error';
+                        document.getElementById('status-text').textContent =
+                            '❌ ' + ((p && p.error) || 'El proceso no se completó (revisa el log).');
+                        imgEl.style.display = 'none';
+                        btn.disabled = false;
+                        return;
+                    }
+
+                    imgEl.src = '/static/completado.png';
+                    document.getElementById('status-text').innerHTML = '✅ Proceso completado exitosamente';
+                    statusEl.className = 'status';
+
+                    p.logs = storedLogs;
+                    showResults(p);
+                    addHistory(p);
+                    btn.disabled = false;
+                }
+                else if (data.type === 'choose') {
+                    // Hay que elegir: codigo en varios proveedores, o repetido en la tarifa.
+                    currentEventSource.close();
+                    statusEl.className = 'status';
+                    document.getElementById('status-text').textContent = '';
+                    imgEl.style.display = 'none';
+                    btn.disabled = false;
+                    mostrarEleccion(data.payload);
+                }
+                else if (data.type === 'error') {
+                    currentEventSource.close();
+                    statusEl.className = 'status error';
+                    document.getElementById('status-text').textContent = '❌ ' + data.msg;
+                    imgEl.style.display = 'none';
+                    btn.disabled = false;
+                }
+            };
+
+            currentEventSource.onerror = function (e) {
+                currentEventSource.close();
+                statusEl.className = 'status error';
+                document.getElementById('status-text').textContent = '❌ Error de conexión al servidor.';
+                imgEl.style.display = 'none';
+                btn.disabled = false;
+            };
+        }
+
+        function showResults(d) {
+            statusEl.className = 'status';
+            resultsEl.classList.add('visible');
+
+            document.getElementById('res-ref').textContent = d.reference +
+                ((d.codigo_erp && String(d.codigo_erp) !== String(d.reference)) ? '  →  en el ERP: ' + d.codigo_erp : '');
+
+            let descText = d.description;
+            if (d.imported) {
+                descText += ' ✓ Importado Automáticamente al ERP';
+            }
+            document.getElementById('res-desc').textContent = descText;
+
+            const catEl = document.getElementById('res-category');
+            const catNorm = (d.category || '').toUpperCase()
+                .replace('Á', 'A').replace('É', 'E').replace('Í', 'I').replace('Ó', 'O').replace('Ú', 'U');
+            catEl.textContent = d.category;
+            catEl.className = 'category-badge cat-' + catNorm;
+
+            document.getElementById('res-provider').textContent = d.provider;
+            document.getElementById('res-provnum').textContent = d.provider_number;
+            document.getElementById('res-unit').textContent = d.unit;
+            document.getElementById('res-calcbase').textContent = d.calculo_base;
+            document.getElementById('res-pcompra').textContent = formatPrice(d.precio_compra);
+            document.getElementById('res-pbase').textContent = formatPrice(d.precio_base);
+            document.getElementById('res-t1').textContent = formatPrice(d.tarifa_1);
+            document.getElementById('res-t2').textContent = formatPrice(d.tarifa_2);
+            document.getElementById('res-t3').textContent = formatPrice(d.tarifa_3);
+            document.getElementById('res-dto1').textContent = d.dto1 || '-';
+            document.getElementById('res-dto2').textContent = d.dto2 || '-';
+            document.getElementById('res-familia').textContent = d.familia;
+            document.getElementById('res-ean').textContent = d.ean;
+
+            showLogs(d.logs || []);
+        }
+
+        function formatPrice(v) {
+            if (!v || v === '' || v === 'nan') return '-';
+            const n = parseFloat(v);
+            if (isNaN(n)) return v;
+            return n.toFixed(2) + ' €';
+        }
+
+        function showLogs(logs) {
+            const el = document.getElementById('log-content');
+            el.innerHTML = logs.map(l => {
+                let cls = 'log-line';
+                if (l.includes('✅')) cls += ' success';
+                else if (l.includes('❌') || l.includes('Error')) cls += ' error';
+                else if (l.includes('⚠') || l.includes('Forzando')) cls += ' warn';
+                return `<div class="${cls}">${escapeHtml(l)}</div>`;
+            }).join('');
+        }
+
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        function addHistory(d) {
+            history.unshift({ ref: d.reference, prov: d.provider, cat: d.category, time: d.timestamp });
+            if (history.length > 10) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const el = document.getElementById('history-list');
+            const cont = document.getElementById('history');
+            if (history.length === 0) { cont.style.display = 'none'; return; }
+            cont.style.display = 'block';
+            el.textContent = '';
+            history.forEach(function (h) {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                addSpan(item, 'hi-ref', h.ref);                          // textContent: los datos de la tarifa no se interpretan como HTML
+                addSpan(item, 'hi-prov', h.prov + ' — ' + h.cat);
+                addSpan(item, 'hi-time', h.time);
+                item.addEventListener('click', function () { input.value = h.ref; buscar(); });
+                el.appendChild(item);
+            });
+        }
+
+        // --- Popup rojo: referencia de un proveedor ya entero en el ERP ---
+        document.getElementById('modal-erp-ok').addEventListener('click', function () {
+            document.getElementById('modal-erp').classList.remove('show');
+            input.focus();
+        });
+
+        // --- Popups rojos: precio 0 / sin precio (bloquea e informa) ---
+        document.getElementById('modal-aviso-ok').addEventListener('click', function () {
+            document.getElementById('modal-aviso').classList.remove('show');
+            document.getElementById('modal-cancel').classList.add('show');   // 2º popup: importación cancelada
+        });
+        document.getElementById('modal-cancel-ok').addEventListener('click', function () {
+            document.getElementById('modal-cancel').classList.remove('show');
+            statusEl.className = 'status';
+            document.getElementById('status-text').textContent = '';
+            document.getElementById('status-img').style.display = 'none';
+            document.getElementById('live-logs').style.display = 'none';
+        });
+
+        // --- Banner: el codigo no es unico -> la persona elige cual es (lo ya importado, en gris) ---
+        const chooseModal = document.getElementById('modal-choose');
+        const chooseOptions = document.getElementById('choose-options');
+
+        function addSpan(parent, cls, text) {
+            const s = document.createElement('span');
+            s.className = cls;
+            s.textContent = text;
+            parent.appendChild(s);
+        }
+
+        function mostrarEleccion(p) {
+            if (p.kind === 'codigo') {       // el codigo ya esta en el sistema en otro proveedor: pedir otra referencia
+                mostrarAlertaCodigo(p);
+                return;
+            }
+            if (p.kind === 'conjunto') {     // la referencia es una pieza de un conjunto -> aceptar (solo esa) o ir al conjunto
+                mostrarAvisoConjunto(p);
+                return;
+            }
+            document.getElementById('choose-title').textContent = p.title || '';
+            document.getElementById('choose-subtitle').textContent = p.subtitle || '';
+            document.getElementById('choose-ref').textContent = p.reference || '';
+            chooseOptions.textContent = '';
+            (p.candidates || []).forEach(function (c) {
+                const opt = document.createElement('button');
+                opt.type = 'button';
+                opt.className = 'choose-option' + (c.disabled ? ' done' : '');
+                addSpan(opt, 'co-prov', c.title);
+                if (c.badge) addSpan(opt, 'co-badge', c.badge);
+                (c.lines || []).forEach(function (line, i) {
+                    addSpan(opt, (i === 0 && p.kind === 'provider') ? 'co-desc' : 'co-meta', line);
+                });
+                if (c.note) addSpan(opt, 'co-note', c.note);
+                if (c.disabled) {
+                    opt.disabled = true;
+                    opt.setAttribute('aria-disabled', 'true');
+                } else {
+                    opt.addEventListener('click', function () {
+                        chooseModal.classList.remove('show');
+                        input.value = p.reference;
+                        buscar(c.provider, (typeof c.row === 'number') ? c.row : null, null, p.conjunto_ok === true);
+                    });
+                }
+                chooseOptions.appendChild(opt);
+            });
+            chooseModal.classList.add('show');
+            const first = chooseOptions.querySelector('.choose-option:not(.done)');
+            if (first) first.focus(); else document.getElementById('choose-cancel').focus();
+        }
+
+        function mostrarAvisoConjunto(p) {
+            document.getElementById('choose-title').textContent = p.title || '';
+            document.getElementById('choose-subtitle').textContent = p.message || '';
+            document.getElementById('choose-ref').textContent = p.reference || '';
+            chooseOptions.textContent = '';
+            const proveedor = (typeof p.provider === 'string') ? p.provider : '';
+            const fila = (typeof p.row === 'number') ? p.row : null;
+            const aceptar = document.createElement('button');
+            aceptar.type = 'button';
+            aceptar.className = 'choose-option';
+            addSpan(aceptar, 'co-prov', p.accept || 'ACEPTAR');
+            addSpan(aceptar, 'co-meta', 'Se introduce solo la ' + (p.reference || ''));
+            aceptar.addEventListener('click', function () {
+                chooseModal.classList.remove('show');
+                input.value = p.reference;
+                buscar(proveedor, fila, null, true);
+            });
+            chooseOptions.appendChild(aceptar);
+            const conjuntos = p.conjuntos || [];
+            if (conjuntos.length === 0) {            // el conjunto no esta en la tarifa: solo se puede cancelar
+                const no = document.createElement('button');
+                no.type = 'button';
+                no.className = 'choose-option';
+                addSpan(no, 'co-prov', p.conjunto_btn || 'NO');
+                no.addEventListener('click', cerrarEleccion);
+                chooseOptions.appendChild(no);
+            } else {
+                conjuntos.forEach(function (codigo) {
+                    const no = document.createElement('button');
+                    no.type = 'button';
+                    no.className = 'choose-option';
+                    addSpan(no, 'co-prov', codigo);
+                    addSpan(no, 'co-meta', (p.conjunto_btn || 'NO: INTRODUCIR EL CONJUNTO'));
+                    no.addEventListener('click', function () {
+                        chooseModal.classList.remove('show');
+                        input.value = codigo;
+                        buscar();
+                    });
+                    chooseOptions.appendChild(no);
+                });
+            }
+            chooseModal.classList.add('show');
+            aceptar.focus();
+        }
+
+        function cerrarEleccion() {
+            chooseModal.classList.remove('show');
+            statusEl.className = 'status';
+            document.getElementById('status-text').textContent = '';
+            document.getElementById('status-img').style.display = 'none';
+            document.getElementById('live-logs').style.display = 'none';
+            input.focus();
+        }
+
+        document.getElementById('choose-cancel').addEventListener('click', cerrarEleccion);
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && chooseModal.classList.contains('show')) cerrarEleccion();
+        });
+
+        // --- Alerta roja: el codigo ya esta en el sistema en OTRO proveedor -> otra referencia en el recuadro ---
+        const codigoModal = document.getElementById('modal-codigo');
+        const codigoInput = document.getElementById('codigo-input');
+        const codigoError = document.getElementById('codigo-error');
+        const CODIGO_PATRON = /^[A-ZÑ0-9][A-ZÑ0-9._\/+-]*$/;     // igual que el servidor: como los codigos reales del ERP
+        let codigoPendiente = null;      // la busqueda que se repite con la referencia nueva
+        let codigoTecleado = '';         // lo ultimo que se escribio, para no perderlo si el servidor la rechaza
+
+        function mostrarAlertaCodigo(p) {
+            codigoPendiente = p;
+            document.getElementById('codigo-title').textContent = p.title || '';
+            document.getElementById('codigo-sub').textContent = p.subtitle || '';
+            codigoError.textContent = p.error || '';
+            codigoInput.value = p.error ? codigoTecleado : '';      // tras un rechazo se conserva lo escrito para corregirlo
+            codigoModal.classList.add('show');
+            codigoInput.focus();
+            codigoInput.select();
+        }
+
+        function problemaCodigo(nuevo) {
+            if (!nuevo) return 'ESCRIBA UNA REFERENCIA.';
+            if (/\s/.test(nuevo)) return 'LA REFERENCIA NO PUEDE LLEVAR ESPACIOS.';
+            if (nuevo.length > 15) return 'LA REFERENCIA ES DEMASIADO LARGA (MÁXIMO 15 CARACTERES).';
+            if (!CODIGO_PATRON.test(nuevo)) return 'SOLO LETRAS, NÚMEROS Y . _ / + - (EMPEZANDO POR UNA LETRA O UN NÚMERO).';
+            return '';
+        }
+
+        function aceptarCodigo() {
+            const p = codigoPendiente;
+            if (!p) return;                                         // ya se envio: evita el doble clic
+            const nuevo = codigoInput.value.trim().toUpperCase();
+            const problema = problemaCodigo(nuevo);
+            if (problema) {
+                codigoError.textContent = problema;
+                codigoInput.focus();
+                return;
+            }
+            codigoPendiente = null;
+            codigoTecleado = nuevo;
+            codigoModal.classList.remove('show');
+            input.value = p.reference;
+            buscar(p.provider, (typeof p.row === 'number') ? p.row : null, nuevo, p.conjunto_ok === true);
+        }
+
+        function cerrarAlertaCodigo() {
+            codigoModal.classList.remove('show');
+            codigoPendiente = null;
+            codigoTecleado = '';
+            statusEl.className = 'status';
+            document.getElementById('status-text').textContent = '';
+            document.getElementById('status-img').style.display = 'none';
+            document.getElementById('live-logs').style.display = 'none';
+            input.focus();
+        }
+
+        document.getElementById('codigo-ok').addEventListener('click', aceptarCodigo);
+        document.getElementById('codigo-cancel').addEventListener('click', cerrarAlertaCodigo);
+        codigoInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); aceptarCodigo(); }
+        });
+        document.addEventListener('keydown', function (e) {
+            if (!codigoModal.classList.contains('show')) return;
+            if (e.key === 'Escape') { cerrarAlertaCodigo(); return; }
+            if (e.key === 'Tab') {                                  // el foco no sale de la alerta
+                const orden = [codigoInput, document.getElementById('codigo-ok'), document.getElementById('codigo-cancel')];
+                const i = orden.indexOf(document.activeElement);
+                const siguiente = e.shiftKey ? (i <= 0 ? orden.length - 1 : i - 1) : (i === orden.length - 1 ? 0 : i + 1);
+                e.preventDefault();
+                orden[siguiente].focus();
+            }
+        });
+
+        // --- REINICIAR REFERENCIA: pestaña inferior con contraseña. La contraseña se COMPRUEBA EN EL SERVIDOR en cada
+        //     peticion; aqui solo se guarda en memoria mientras la ventana esta abierta (al cerrar se olvida). ---
+        const rTab = document.getElementById('tab-reinicio');
+        const rModal = document.getElementById('modal-reinicio');
+        const rClave = document.getElementById('reinicio-clave');
+        const rRef = document.getElementById('reinicio-ref');
+        const rError = document.getElementById('reinicio-error');
+        const R_PASOS = ['clave', 'ref', 'filas', 'fin'];
+        const R_ACCIONES = ['reinicio-entrar', 'reinicio-buscar', 'reinicio-confirmar'];
+        let rPin = '';                   // la contraseña buena, solo mientras la ventana esta abierta
+        let rRefActual = '';             // la referencia que se esta reiniciando
+        let rOcupado = false;            // una peticion en marcha: evita el doble clic
+        let rSesion = 0;                 // sube al abrir y al cerrar: la respuesta de una ventana anterior se ignora
+        let rFilasVistas = 0;            // cuantas importaciones vio la persona al buscar (el servidor no borra si ya son otras)
+        const R_TIMEOUT_MS = 20000;      // si el servidor no contesta, no se queda todo bloqueado
+
+        function rPaso(nombre) {
+            R_PASOS.forEach(p => { document.getElementById('reinicio-paso-' + p).hidden = (p !== nombre); });
+            rError.textContent = '';
+            const foco = { clave: rClave, ref: rRef, filas: document.getElementById('reinicio-atras'),
+                           fin: document.getElementById('reinicio-otra') }[nombre];
+            if (foco) { foco.focus(); if (foco.select) foco.select(); }     // en "filas" el foco cae en ATRAS: Enter nunca borra
+        }
+
+        function rAbrir() {
+            rSesion++;
+            rPin = ''; rClave.value = ''; rRef.value = ''; rRefActual = ''; rFilasVistas = 0;
+            rModal.classList.add('show');
+            rPaso('clave');
+        }
+
+        function rCerrar(devolverFoco) {
+            rSesion++;
+            rModal.classList.remove('show');
+            rPin = ''; rClave.value = ''; rRef.value = ''; rRefActual = ''; rFilasVistas = 0;
+            if (devolverFoco !== false) rTab.focus();
+        }
+
+        function rBloquear(si) {
+            R_ACCIONES.forEach(id => { document.getElementById(id).disabled = si; });
+        }
+
+        async function rPedir(ruta, datos) {
+            if (rOcupado) return null;
+            const sesion = rSesion;
+            rOcupado = true; rBloquear(true);
+            try {
+                const opciones = { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos) };
+                if (typeof AbortSignal !== 'undefined' && AbortSignal.timeout) opciones.signal = AbortSignal.timeout(R_TIMEOUT_MS);
+                const r = await fetch(ruta, opciones);
+                const j = await r.json().catch(() => ({}));
+                return sesion !== rSesion ? null : { estado: r.status, ok: r.ok && j.ok === true, datos: j };   // ventana cerrada o reabierta: se ignora
+            } catch (e) {
+                return sesion !== rSesion ? null : { estado: 0, ok: false, datos: { error: 'No se pudo contactar con el servidor. Comprueba que sigue en marcha.' } };
+            } finally {
+                rOcupado = false; rBloquear(false);
+            }
+        }
+
+        // 401/429: la contraseña ya no vale (o hay bloqueo): se vuelve a pedir
+        function rClaveRechazada(r) {
+            if (r.estado !== 401 && r.estado !== 429) return false;
+            const msg = r.datos.error || 'Contraseña incorrecta.';
+            rPin = ''; rClave.value = '';
+            rPaso('clave');
+            rError.textContent = msg;
+            return true;
+        }
+
+        async function rEntrar() {
+            const clave = rClave.value;
+            if (!clave) { rError.textContent = 'Escribe la contraseña.'; rClave.focus(); return; }
+            const r = await rPedir('/reiniciar/entrar', { password: clave });
+            if (!r) return;
+            if (!r.ok) {
+                rError.textContent = r.datos.error || 'No se pudo entrar.';
+                rClave.value = ''; rClave.focus();
+                return;
+            }
+            rPin = clave; rClave.value = '';
+            rPaso('ref');
+        }
+
+        function rPintarFilas(filas) {
+            const lista = document.getElementById('reinicio-lista');
+            lista.textContent = '';
+            const nuevo = (clase, texto) => { const e = document.createElement('div'); e.className = clase; e.textContent = texto; return e; };
+            filas.forEach(f => {
+                const fila = document.createElement('div');
+                fila.className = 'reinicio-fila';
+                const cab = document.createElement('div');
+                cab.className = 'rf-cab';
+                const prov = document.createElement('span'); prov.className = 'rf-prov'; prov.textContent = f.proveedor || '';
+                const fecha = document.createElement('span'); fecha.className = 'rf-fecha'; fecha.textContent = f.fecha || '';
+                cab.append(prov, fecha);
+                const distinto = f.codigo_tecleado && f.codigo_tecleado !== f.codigo_erp;
+                fila.append(cab,
+                    nuevo('rf-cod', 'Entró en el ERP como ' + f.codigo_erp + (distinto ? '  (tecleado: ' + f.codigo_tecleado + ')' : '')),
+                    nuevo('rf-desc', f.descripcion || ''));
+                lista.appendChild(fila);
+            });
+        }
+
+        function rFinal(texto) {
+            document.getElementById('reinicio-final').textContent = texto;
+            rPaso('fin');
+        }
+
+        async function rBuscar() {
+            const ref = rRef.value.trim().toUpperCase();
+            if (!ref) { rError.textContent = 'Escribe una referencia.'; rRef.focus(); return; }
+            const r = await rPedir('/reiniciar/buscar', { password: rPin, reference: ref });
+            if (!r) return;
+            if (rClaveRechazada(r)) return;
+            if (!r.ok) { rError.textContent = r.datos.error || 'No se pudo buscar la referencia.'; rRef.focus(); return; }
+            rRefActual = r.datos.referencia || ref;
+            const filas = r.datos.filas || [];
+            rFilasVistas = filas.length;
+            if (!filas.length) {
+                rFinal('El programa no tiene apuntada la referencia ' + rRefActual + ': ya está como si nunca se hubiera metido.');
+                return;
+            }
+            document.getElementById('reinicio-resumen').textContent =
+                'Esto es lo que el programa tiene apuntado de la referencia ' + rRefActual + ' (' + filas.length +
+                (filas.length === 1 ? ' importación' : ' importaciones') + '):';
+            rPintarFilas(filas);
+            rPaso('filas');
+        }
+
+        async function rConfirmar() {
+            const r = await rPedir('/reiniciar/confirmar', { password: rPin, reference: rRefActual, esperadas: rFilasVistas });
+            if (!r) return;
+            if (rClaveRechazada(r)) return;
+            if (r.datos.cambiado) {                      // alguien importo o reinicio mientras mirabas: se vuelve a buscar
+                rPaso('ref'); rRef.value = rRefActual;
+                rError.textContent = r.datos.error || 'Lo apuntado ha cambiado. Vuelve a buscar.';
+                return;
+            }
+            if (!r.ok) { rError.textContent = r.datos.error || 'No se pudo reiniciar la referencia.'; return; }
+            const n = r.datos.borradas;
+            rFinal('✅ Referencia ' + rRefActual + ' reiniciada: el programa ha olvidado ' + n + (n === 1 ? ' importación' : ' importaciones') +
+                '. Ya puedes meterla con su código original (si otro proveedor ya usa ese código, el programa te lo avisará).');
+        }
+
+        rTab.addEventListener('click', rAbrir);
+        document.getElementById('reinicio-entrar').addEventListener('click', rEntrar);
+        document.getElementById('reinicio-buscar').addEventListener('click', rBuscar);
+        document.getElementById('reinicio-confirmar').addEventListener('click', rConfirmar);
+        document.getElementById('reinicio-atras').addEventListener('click', () => { rPaso('ref'); });
+        document.getElementById('reinicio-otra').addEventListener('click', () => { rRef.value = ''; rRefActual = ''; rPaso('ref'); });
+        document.getElementById('reinicio-meter').addEventListener('click', () => {
+            const ref = rRefActual;
+            rCerrar(false);
+            input.value = ref;
+            input.focus();
+        });
+        rModal.querySelectorAll('[data-cerrar]').forEach(b => b.addEventListener('click', () => rCerrar()));
+        rClave.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); rEntrar(); } });
+        rRef.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); rBuscar(); } });
+        document.addEventListener('keydown', function (e) {
+            if (!rModal.classList.contains('show')) return;
+            if (e.key === 'Escape') { rCerrar(); return; }
+            if (e.key === 'Tab') {                                  // el foco no sale de la ventana
+                const orden = Array.from(rModal.querySelectorAll('input, button, [tabindex="0"]'))
+                    .filter(el => !el.disabled && !el.closest('[hidden]'));
+                if (!orden.length) return;
+                const i = orden.indexOf(document.activeElement);
+                const siguiente = e.shiftKey ? (i <= 0 ? orden.length - 1 : i - 1) : (i === orden.length - 1 ? 0 : i + 1);
+                e.preventDefault();
+                orden[siguiente].focus();
+            }
+        });
+    </script>
+
+</body>
+
+</html>

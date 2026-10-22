@@ -1,0 +1,2 @@
+Aqui van las imagenes de la interfaz (en_proceso.gif, completado.png). No se publican con el codigo;
+sin ellas la web funciona igual.
