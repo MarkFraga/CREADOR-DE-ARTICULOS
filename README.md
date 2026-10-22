@@ -1,4 +1,4 @@
-# DON ARTICULO
+# CREADOR DE ARTICULOS
 
 Herramienta interna de alta de artículos en un ERP para una empresa del sector cerámica y baño.
 
